@@ -28,20 +28,20 @@ app.use('/api/conversation', require('./routes/conversation.js'));
 const onlineUsers = []; // To keep track of online users
 
 io.on('connection', (socket) => {
-    // console.log('A user connected with socket ID:', socket.id);
+    console.log('A user connected with socket ID:', socket.id);
 
     // Add new user to online users
     socket.on('registerUser', (userId) => {
         if (!onlineUsers.find(u => u.userId === userId)) {
             onlineUsers.push({ socketId: socket.id, userId });
-            // console.log('User registered successfully:', { userId, socketId: socket.id });
+            console.log('User registered successfully:', { userId, socketId: socket.id });
             io.emit('updateUserList', onlineUsers); // Emit updated user list
-            // console.log('Updated online users:', onlineUsers);
+            console.log('Updated online users:', onlineUsers);
 
         } else {
-            // console.log('User already registered:', userId);
+            console.log('User already registered:', userId);
             io.emit('updateUserList', onlineUsers); // Emit updated user list
-            // console.log('Updated online users:', onlineUsers);
+            console.log('Updated online users:', onlineUsers);
 
         }
     });
@@ -51,13 +51,13 @@ io.on('connection', (socket) => {
         if (index !== -1) {
             onlineUsers.splice(index, 1); // Remove the user from the list
             io.emit('updateUserList', onlineUsers); // Emit updated user list
-            // console.log(`User ${userId} has logged out.`);
+            console.log(`User ${userId} has logged out.`);
         }
     });
 
     // Handle sending messages to a specific user
     socket.on('sendMessage', ({ recipientId, content, senderName, sender, conversationId, _id, createdAt, isRead }) => {
-        // console.log(`Message from ${senderName} to ${recipientId}:`, content);
+        console.log(`Message from ${senderName} to ${recipientId}:`, content);
         const recipient = onlineUsers.find(u => u.userId === recipientId);
         if (recipient) {
             io.to(recipient.socketId).emit('receiveMessage', {
@@ -71,7 +71,7 @@ io.on('connection', (socket) => {
                 createdAt,
                 isRead
             });
-            // console.log(`Message sent to ${recipientId}`);
+            console.log(`Message sent to ${recipientId}`);
         } else {
             console.log(`Recipient ${recipientId} not found or not online.`);
         }
@@ -87,10 +87,10 @@ io.on('connection', (socket) => {
         const index = onlineUsers.findIndex(u => u.socketId === socket.id);
         if (index !== -1) {
             const disconnectedUser = onlineUsers[index];
-            // console.log(`User disconnected:`, disconnectedUser);
+            console.log(`User disconnected:`, disconnectedUser);
             onlineUsers.splice(index, 1); // Remove disconnected user
             io.emit('updateUserList', onlineUsers); // Emit updated user list
-            // console.log('Updated online users:', onlineUsers);
+            console.log('Updated online users:', onlineUsers);
         }
     });
 });
