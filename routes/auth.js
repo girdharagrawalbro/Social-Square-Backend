@@ -120,27 +120,9 @@ router.get("/other-users", async (req, res) => {
             _id: { $ne: loggedUserId, $nin: user.following }, // Exclude logged-in user and followed users
             followers: { $in: user.following }, // Suggest users followed by those in the following list
         })
-            .limit(10)
+            .limit(20)
             .select("_id fullname profile_picture");
-        console.log(suggestions);
-
-        // Ensure no duplicate or already-followed users are included
-        const existingSuggestionIds = new Set(suggestions.map((s) => s._id.toString()));
-
-        if (suggestions.length < 10) {
-            const additionalUsers = await User.find({
-                _id: {
-                    $ne: loggedUserId, // Exclude logged-in user
-                    $nin: user.following, // Exclude followed users
-                },
-            })
-                .limit(10 - suggestions.length)
-                .select("_id fullname profile_picture");
-
-            console.log(additionalUsers);
-            suggestions = [...suggestions, ...additionalUsers];
-        }
-
+        
         return res.status(200).json(suggestions);
 
     } catch (error) {
