@@ -122,6 +122,24 @@ router.get("/other-users", async (req, res) => {
         })
             .limit(10)
             .select("_id fullname profile_picture");
+        console.log(suggestions);
+
+        // Ensure no duplicate or already-followed users are included
+        const existingSuggestionIds = new Set(suggestions.map((s) => s._id.toString()));
+
+        if (suggestions.length < 10) {
+            const additionalUsers = await User.find({
+                _id: {
+                    $ne: loggedUserId, // Exclude logged-in user
+                    $nin: user.following, // Exclude followed users
+                },
+            })
+                .limit(10 - suggestions.length)
+                .select("_id fullname profile_picture");
+
+            console.log(additionalUsers);
+            suggestions = [...suggestions, ...additionalUsers];
+        }
 
         return res.status(200).json(suggestions);
 
